@@ -1,122 +1,161 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 
-void main() => runApp(FlipClock());
+void main() => runApp(
+      MaterialApp(
+        title: 'Flip Clock',
+        home: FlipClock(),
+      ),
+    );
 
 class FlipClock extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'FlipClock',
-      home: AnimatedFlipClock(),
+    return Scaffold(
+      backgroundColor: Colors.grey,
+      body: Center(
+        child: FlipingClock(
+          width: 100,
+          height: 100,
+          color: Colors.black,
+          bgColor: Colors.white,
+        ),
+      ),
     );
   }
 }
 
-class AnimatedFlipClock extends StatefulWidget {
+class FlipingClock extends StatefulWidget {
+  final double width;
+  final double height;
+  final Color color;
+  final Color bgColor;
+
+  FlipingClock({
+    required this.width,
+    required this.height,
+    required this.color,
+    required this.bgColor,
+  });
+
   @override
-  _AnimatedFlipClockState createState() => _AnimatedFlipClockState();
+  _FlipingClockState createState() => _FlipingClockState();
 }
 
-class _AnimatedFlipClockState extends State<AnimatedFlipClock> {
-  DateTime time = new DateTime.now();
-  late Timer _timer;
-
+class _FlipingClockState extends State<FlipingClock> {
+  late Timer? timer;
+  late int anim;
   @override
   void initState() {
+    // TODO: implement initState
+    anim = 1;
     super.initState();
-    _timer = new Timer.periodic(Duration(milliseconds: 100), (timer) {
+    timer = Timer.periodic(Duration(milliseconds: 10), (timer) {
       setState(() {
-        time = new DateTime.now();
+        anim++;
+        if (anim > 30) anim = 1;
       });
     });
   }
 
   @override
-  void deactivate() {
-    _timer.cancel();
-    super.deactivate();
+  Widget build(BuildContext context) {
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        _buildClockBackground(),
+        _buildFlipingClock(anim / 30 * pi),
+      ],
+    );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    Size size = MediaQuery.of(context).size;
-    double width = size.width / 5;
-    double height = size.height / 3;
-    return Scaffold(
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          setState(() {});
-        },
-        child: Icon(Icons.refresh),
-      ),
-      backgroundColor: Colors.black,
-      body: Center(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            _buildClock(width, height, time.hour),
-            SizedBox(
-              width: 10,
+  Widget _buildClockBackground() {
+    return Container(
+      width: widget.width,
+      height: widget.height * 2 + 2,
+      decoration: BoxDecoration(boxShadow: [
+        BoxShadow(
+          offset: Offset(1.0, 1.0),
+          blurRadius: 10,
+          color: Colors.black,
+        )
+      ]),
+      child: Column(
+        children: [
+          Expanded(
+            child: Container(
+              decoration: BoxDecoration(
+                color: widget.bgColor,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(widget.width / 10),
+                  topRight: Radius.circular(widget.width / 10),
+                ),
+              ),
             ),
-            _buildClock(width, height, time.minute),
-            SizedBox(
-              width: 10,
+          ),
+          const SizedBox(
+            height: 2,
+          ),
+          Expanded(
+            child: Container(
+              decoration: BoxDecoration(
+                color: widget.bgColor,
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(widget.width / 10),
+                  bottomRight: Radius.circular(widget.width / 10),
+                ),
+              ),
             ),
-            _buildClock(width, height, time.second)
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
-  Stack _buildClock(double width, double height, int time) {
-    const double radius = 5;
-    return Stack(
-      alignment: Alignment.center,
-      children: [
-        AnimatedContainer(
-          duration: Duration(milliseconds: 100),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                width: width,
-                height: height,
-                decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(radius),
-                      topRight: Radius.circular(radius),
-                    )),
-              ),
-              SizedBox(
-                height: height / 30,
-              ),
-              Container(
-                width: width,
-                height: height,
-                decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.only(
-                      bottomLeft: Radius.circular(radius),
-                      bottomRight: Radius.circular(radius),
-                    )),
-              ),
-            ],
+  Widget _buildFlipingClock(double angle) {
+    final isFlip = angle > (pi / 2);
+    final transformAngle = isFlip ? angle - pi : angle;
+
+    return Positioned(
+      top: isFlip ? null : 0.0,
+      bottom: isFlip ? 0.0 : null,
+      left: 0,
+      right: 0,
+      child: Transform(
+        transform: Matrix4.identity()
+          ..setEntry(3, 2, 0.002)
+          ..rotateX(transformAngle),
+        alignment:
+            isFlip ? FractionalOffset(0.5, 0.0) : FractionalOffset(0.5, 1.01),
+        child: Container(
+          width: widget.width,
+          height: widget.height,
+          alignment: isFlip ? Alignment.topCenter : Alignment.bottomCenter,
+          decoration: BoxDecoration(
+            color: Colors.amber,
+            borderRadius: BorderRadius.only(
+              topLeft: isFlip
+                  ? Radius.circular(0)
+                  : Radius.circular(widget.width / 10),
+              topRight: isFlip
+                  ? Radius.circular(0)
+                  : Radius.circular(widget.width / 10),
+              bottomLeft: isFlip
+                  ? Radius.circular(widget.width / 10)
+                  : Radius.circular(0),
+              bottomRight: isFlip
+                  ? Radius.circular(widget.width / 10)
+                  : Radius.circular(0),
+            ),
+          ),
+          child: Text(
+            isFlip ? '24' : '23',
+            style: TextStyle(fontSize: 50),
           ),
         ),
-        Text(
-          '$time',
-          style: TextStyle(
-            color: Colors.black,
-            fontWeight: FontWeight.bold,
-            fontSize: width - 50,
-          ),
-        )
-      ],
+      ),
     );
   }
 }
