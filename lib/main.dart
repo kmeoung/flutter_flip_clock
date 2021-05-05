@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:math';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
@@ -16,9 +17,9 @@ class FlipClock extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.grey,
       body: Center(
-        child: FlipingClock(
-          width: 100,
-          height: 100,
+        child: FlippingClock(
+          width: 300,
+          height: 300,
           color: Colors.black,
           bgColor: Colors.white,
         ),
@@ -27,13 +28,13 @@ class FlipClock extends StatelessWidget {
   }
 }
 
-class FlipingClock extends StatefulWidget {
+class FlippingClock extends StatefulWidget {
   final double width;
   final double height;
   final Color color;
   final Color bgColor;
 
-  FlipingClock({
+  FlippingClock({
     required this.width,
     required this.height,
     required this.color,
@@ -41,10 +42,10 @@ class FlipingClock extends StatefulWidget {
   });
 
   @override
-  _FlipingClockState createState() => _FlipingClockState();
+  _FlippingClockState createState() => _FlippingClockState();
 }
 
-class _FlipingClockState extends State<FlipingClock> {
+class _FlippingClockState extends State<FlippingClock> {
   late Timer? timer;
   late int anim;
   @override
@@ -52,12 +53,19 @@ class _FlipingClockState extends State<FlipingClock> {
     // TODO: implement initState
     anim = 1;
     super.initState();
-    timer = Timer.periodic(Duration(milliseconds: 10), (timer) {
+    timer = Timer.periodic(Duration(milliseconds: 50), (timer) {
       setState(() {
         anim++;
-        if (anim > 30) anim = 1;
+        if (anim > 60) anim = 1;
       });
     });
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    if (timer != null) timer!.cancel();
   }
 
   @override
@@ -66,7 +74,7 @@ class _FlipingClockState extends State<FlipingClock> {
       alignment: Alignment.center,
       children: [
         _buildClockBackground(),
-        _buildFlipingClock(anim / 30 * pi),
+        _buildFlipingClock(anim / 60 * pi),
       ],
     );
   }
@@ -89,8 +97,8 @@ class _FlipingClockState extends State<FlipingClock> {
               decoration: BoxDecoration(
                 color: widget.bgColor,
                 borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(widget.width / 10),
-                  topRight: Radius.circular(widget.width / 10),
+                  topLeft: const Radius.circular(10),
+                  topRight: const Radius.circular(10),
                 ),
               ),
             ),
@@ -103,8 +111,8 @@ class _FlipingClockState extends State<FlipingClock> {
               decoration: BoxDecoration(
                 color: widget.bgColor,
                 borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(widget.width / 10),
-                  bottomRight: Radius.circular(widget.width / 10),
+                  bottomLeft: const Radius.circular(10),
+                  bottomRight: const Radius.circular(10),
                 ),
               ),
             ),
@@ -125,7 +133,7 @@ class _FlipingClockState extends State<FlipingClock> {
       right: 0,
       child: Transform(
         transform: Matrix4.identity()
-          ..setEntry(3, 2, 0.002)
+          ..setEntry(3, 2, 0.001)
           ..rotateX(transformAngle),
         alignment:
             isFlip ? FractionalOffset(0.5, 0.0) : FractionalOffset(0.5, 1.01),
@@ -133,26 +141,25 @@ class _FlipingClockState extends State<FlipingClock> {
           width: widget.width,
           height: widget.height,
           alignment: isFlip ? Alignment.topCenter : Alignment.bottomCenter,
+          padding: isFlip
+              ? const EdgeInsets.only(bottom: 50)
+              : const EdgeInsets.only(top: 50),
           decoration: BoxDecoration(
             color: Colors.amber,
             borderRadius: BorderRadius.only(
-              topLeft: isFlip
-                  ? Radius.circular(0)
-                  : Radius.circular(widget.width / 10),
-              topRight: isFlip
-                  ? Radius.circular(0)
-                  : Radius.circular(widget.width / 10),
-              bottomLeft: isFlip
-                  ? Radius.circular(widget.width / 10)
-                  : Radius.circular(0),
-              bottomRight: isFlip
-                  ? Radius.circular(widget.width / 10)
-                  : Radius.circular(0),
+              topLeft:
+                  isFlip ? const Radius.circular(0) : const Radius.circular(10),
+              topRight:
+                  isFlip ? const Radius.circular(0) : const Radius.circular(10),
+              bottomLeft:
+                  isFlip ? const Radius.circular(10) : const Radius.circular(0),
+              bottomRight:
+                  isFlip ? const Radius.circular(10) : const Radius.circular(0),
             ),
           ),
           child: Text(
             isFlip ? '24' : '23',
-            style: TextStyle(fontSize: 50),
+            style: TextStyle(fontSize: 85, fontWeight: FontWeight.bold),
           ),
         ),
       ),
