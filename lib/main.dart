@@ -14,12 +14,13 @@ void main() => runApp(
 class FlipClock extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    Size size = MediaQuery.of(context).size;
     return Scaffold(
       backgroundColor: Colors.grey,
       body: Center(
         child: FlippingClock(
-          width: 300,
-          height: 300,
+          width: size.width / 4,
+          height: size.width / 3,
           color: Colors.black,
           bgColor: Colors.white,
         ),
@@ -48,6 +49,8 @@ class FlippingClock extends StatefulWidget {
 class _FlippingClockState extends State<FlippingClock> {
   late Timer? timer;
   late int anim;
+  late final textSize;
+
   @override
   void initState() {
     // TODO: implement initState
@@ -59,6 +62,7 @@ class _FlippingClockState extends State<FlippingClock> {
         if (anim > 60) anim = 1;
       });
     });
+    textSize = widget.width / 5 * 4;
   }
 
   @override
@@ -101,10 +105,19 @@ class _FlippingClockState extends State<FlippingClock> {
                   topRight: const Radius.circular(10),
                 ),
               ),
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  Positioned(
+                    top: widget.height / 2,
+                    child: _textStyle('59'),
+                  ),
+                ],
+              ),
             ),
           ),
           const SizedBox(
-            height: 2,
+            height: 10,
           ),
           Expanded(
             child: Container(
@@ -115,10 +128,31 @@ class _FlippingClockState extends State<FlippingClock> {
                   bottomRight: const Radius.circular(10),
                 ),
               ),
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  Positioned(
+                    bottom: widget.height / 2,
+                    child: _textStyle('58'),
+                  ),
+                ],
+              ),
             ),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _textStyle(String text) {
+    return Text(
+      text,
+      style: TextStyle(
+        fontSize: textSize,
+        fontWeight: FontWeight.bold,
+        height: 0,
+      ),
+      textAlign: TextAlign.center,
     );
   }
 
@@ -136,14 +170,11 @@ class _FlippingClockState extends State<FlippingClock> {
           ..setEntry(3, 2, 0.001)
           ..rotateX(transformAngle),
         alignment:
-            isFlip ? FractionalOffset(0.5, 0.0) : FractionalOffset(0.5, 1.01),
+            isFlip ? FractionalOffset(0.5, 0.0) : FractionalOffset(0.5, 1.0),
         child: Container(
           width: widget.width,
           height: widget.height,
           alignment: isFlip ? Alignment.topCenter : Alignment.bottomCenter,
-          padding: isFlip
-              ? const EdgeInsets.only(bottom: 50)
-              : const EdgeInsets.only(top: 50),
           decoration: BoxDecoration(
             color: Colors.amber,
             borderRadius: BorderRadius.only(
@@ -157,9 +188,15 @@ class _FlippingClockState extends State<FlippingClock> {
                   isFlip ? const Radius.circular(10) : const Radius.circular(0),
             ),
           ),
-          child: Text(
-            isFlip ? '24' : '23',
-            style: TextStyle(fontSize: 85, fontWeight: FontWeight.bold),
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              Positioned(
+                top: isFlip ? null : widget.height / 2,
+                bottom: isFlip ? widget.height / 2 : null,
+                child: _textStyle(isFlip ? '59' : '58'),
+              ),
+            ],
           ),
         ),
       ),
