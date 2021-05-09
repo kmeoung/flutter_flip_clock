@@ -14,15 +14,14 @@ void main() => runApp(
 class FlipClock extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    Size size = MediaQuery.of(context).size;
     return Scaffold(
-      backgroundColor: Colors.grey,
+      backgroundColor: Colors.white,
       body: Center(
         child: FlippingClock(
-          width: size.width / 4,
-          height: size.width / 3,
-          color: Colors.black,
-          bgColor: Colors.white,
+          width: 500,
+          height: 500,
+          color: Colors.white,
+          bgColor: Colors.grey[900]!,
         ),
       ),
     );
@@ -56,13 +55,13 @@ class _FlippingClockState extends State<FlippingClock> {
     // TODO: implement initState
     anim = 1;
     super.initState();
-    timer = Timer.periodic(Duration(milliseconds: 50), (timer) {
+    timer = Timer.periodic(Duration(milliseconds: 10), (timer) {
       setState(() {
         anim++;
         if (anim > 60) anim = 1;
       });
     });
-    textSize = widget.width / 5 * 4;
+    textSize = widget.width / 2 * 1.5;
   }
 
   @override
@@ -86,7 +85,7 @@ class _FlippingClockState extends State<FlippingClock> {
   Widget _buildClockBackground() {
     return Container(
       width: widget.width,
-      height: widget.height * 2 + 2,
+      height: widget.height,
       decoration: BoxDecoration(boxShadow: [
         BoxShadow(
           offset: Offset(1.0, 1.0),
@@ -109,15 +108,15 @@ class _FlippingClockState extends State<FlippingClock> {
                 alignment: Alignment.center,
                 children: [
                   Positioned(
-                    top: widget.height / 2,
+                    top: widget.height / 10 - widget.height / 25,
                     child: _textStyle('59'),
                   ),
                 ],
               ),
             ),
           ),
-          const SizedBox(
-            height: 10,
+          SizedBox(
+            height: widget.height / 50,
           ),
           Expanded(
             child: Container(
@@ -132,7 +131,7 @@ class _FlippingClockState extends State<FlippingClock> {
                 alignment: Alignment.center,
                 children: [
                   Positioned(
-                    bottom: widget.height / 2,
+                    bottom: widget.height / 10 - widget.height / 25,
                     child: _textStyle('58'),
                   ),
                 ],
@@ -150,6 +149,7 @@ class _FlippingClockState extends State<FlippingClock> {
       style: TextStyle(
         fontSize: textSize,
         fontWeight: FontWeight.bold,
+        color: Colors.white,
         height: 0,
       ),
       textAlign: TextAlign.center,
@@ -170,13 +170,13 @@ class _FlippingClockState extends State<FlippingClock> {
           ..setEntry(3, 2, 0.001)
           ..rotateX(transformAngle),
         alignment:
-            isFlip ? FractionalOffset(0.5, 0.0) : FractionalOffset(0.5, 1.0),
+            isFlip ? FractionalOffset(0.5, 0.0) : FractionalOffset(0.5, 1.01),
         child: Container(
           width: widget.width,
-          height: widget.height,
+          height: widget.height / 2,
           alignment: isFlip ? Alignment.topCenter : Alignment.bottomCenter,
           decoration: BoxDecoration(
-            color: Colors.amber,
+            color: Colors.grey[900],
             borderRadius: BorderRadius.only(
               topLeft:
                   isFlip ? const Radius.circular(0) : const Radius.circular(10),
@@ -192,8 +192,8 @@ class _FlippingClockState extends State<FlippingClock> {
             alignment: Alignment.center,
             children: [
               Positioned(
-                top: isFlip ? null : widget.height / 2,
-                bottom: isFlip ? widget.height / 2 : null,
+                top: isFlip ? null : widget.height / 10 - widget.height / 25,
+                bottom: isFlip ? widget.height / 10 - widget.height / 25 : null,
                 child: _textStyle(isFlip ? '59' : '58'),
               ),
             ],
